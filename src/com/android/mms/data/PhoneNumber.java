@@ -16,66 +16,91 @@
 
 package com.android.mms.data;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-
+import android.content.ContentResolver;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.net.Uri;
+import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.provider.ContactsContract.CommonDataKinds.Phone;
+import android.provider.ContactsContract.ContactCounts;
+import android.provider.ContactsContract.Preferences;
+import android.provider.Settings;
+import android.telephony.PhoneNumberUtils;
 import android.util.Log;
 
 import com.android.mms.LogTag;
+import com.android.mms.ui.SelectRecipientsList;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.TreeSet;
 
 /**
  * An interface for finding information about phone numbers
  */
-public class PhoneNumber {
-    private static final String TAG = "Mms/recipient";
-    private static final boolean DEBUG = false;
+public class PhoneNumber implements Comparable<PhoneNumber> {
+    private static final String TAG = "Mms/PhoneNumber";
 
-    private static final int _ID                    = 0;
-    private static final int PHONE_NUMBER           = 1;
-    private static final int PHONE_TYPE             = 2;
-    private static final int PHONE_LABEL            = 3;
-    private static final int PHONE_DISPLAY_NAME     = 4;
-    private static final int PHONE_IS_SUPER_PRIMARY = 5;
-    private static final int PHONE_CONTACT_ID       = 6;
+    private static final String[] PROJECTION = new String[] {
+        Phone._ID,
+        Phone.NUMBER,
+        Phone.TYPE,
+        Phone.LABEL,
+        Phone.DISPLAY_NAME_PRIMARY,
+        Phone.IS_SUPER_PRIMARY,
+        Phone.CONTACT_ID
+    };
 
-    private Context mContext;
+    private static final String[] PROJECTION_ALT = new String[] {
+        Phone._ID,
+        Phone.NUMBER,
+        Phone.TYPE,
+        Phone.LABEL,
+        Phone.DISPLAY_NAME_ALTERNATIVE,
+        Phone.IS_SUPER_PRIMARY,
+        Phone.CONTACT_ID
+    };
+
+    private static final String SELECTION = Phone.NUMBER + " NOT NULL";
+    private static final String SELECTION_MOBILE_ONLY = SELECTION +
+            " AND " + Phone.TYPE + "=" + Phone.TYPE_MOBILE;
+
+    private static final int COLUMN_ID               = 0;
+    private static final int COLUMN_NUMBER           = 1;
+    private static final int COLUMN_TYPE             = 2;
+    private static final int COLUMN_LABEL            = 3;
+    private static final int COLUMN_DISPLAY_NAME     = 4;
+    private static final int COLUMN_IS_SUPER_PRIMARY = 5;
+    private static final int COLUMN_CONTACT_ID       = 6;
 
     private long mId;
-    private String mNumber;           // The number of the phone
-    private int mType;                // The type of the number of the phone
-    private String mLabel;            // The label of the number of the phone
-    private String mName;             // The name of the contact which the phone belongs to
-    private boolean mIsDefault;       // True if this phone is the default of the contact
-    private boolean mIsFirst;         // True if this phone is the first of the contact (needed if default is not set)
-    private long mContactId;          // The ID of the contact
-    private ArrayList<Group> mGroups; // The groups of the contact
-    private boolean mIsChecked;       // True if user has selected the phone
+    private String mNumber;
+    private int mType;
+    private String mLabel;
+    private String mName;
+    private boolean mIsDefault;
+    private long mContactId;
+    private ArrayList<Group> mGroups;
+    private boolean mIsChecked;
+    private String mSectionIndex;
 
-    private PhoneNumber(Context context, long id, String number, int type, String label,
-                      String name, boolean isDefault, boolean isFirst, long contactId, ArrayList<Group> groups, boolean isChecked) {
-        mContext = context;
+    private PhoneNumber(Context context, Cursor c, String sectionIndex) {
+        mId = c.getLong(COLUMN_ID);
+        mNumber = c.getString(COLUMN_NUMBER);
+        mType = c.getInt(COLUMN_TYPE);
+        mLabel = c.getString(COLUMN_LABEL);
+        mName = c.getString(COLUMN_DISPLAY_NAME);
+        mContactId = c.getLong(COLUMN_CONTACT_ID);
+        mIsDefault = c.getInt(COLUMN_IS_SUPER_PRIMARY) != 0;
+        mGroups = new ArrayList<Group>();
+        mSectionIndex = sectionIndex;
 
-        mId = id;
-        mNumber = number;
-        mType = type;
-        mLabel = label;
-        mName = name;
-        mIsDefault = isDefault;
-        mIsFirst = isFirst;
-        mContactId = contactId;
-        mGroups = groups;
-        mIsChecked = isChecked;
-    }
-
-    private PhoneNumber(Context context, Cursor cursor) {
-        if (DEBUG) {
-            Log.v(TAG, "Recipient constructor cursor");
+        if (Log.isLoggable(LogTag.THREAD_CACHE, Log.VERBOSE)) {
+            Log.d(TAG, "Create phone number: recipient=" + mName + ", recipientId="
+                + mId + ", recipientNumber=" + mNumber);
         }
-
-        fillFromCursor(context, this, cursor);
     }
 
     public long getId() {
@@ -94,6 +119,10 @@ public class PhoneNumber {
         return mLabel;
     }
 
+    public String getSectionIndex() {
+        return mSectionIndex;
+    }
+
     public String getName() {
         return mName;
     }
@@ -102,24 +131,8 @@ public class PhoneNumber {
         return mIsDefault;
     }
 
-    public void setDefault(boolean isDefault) {
-        mIsDefault = isDefault;
-    }
-
-    public boolean isFirst() {
-        return mIsFirst;
-    }
-
-    public void setFirst(boolean isFirst) {
-        mIsFirst = isFirst;
-    }
-
     public long getContactId() {
         return mContactId;
-    }
-
-    public Contact getContact() {
-        return Contact.get(mNumber, false);
     }
 
     public ArrayList<Group> getGroups() {
@@ -143,46 +156,38 @@ public class PhoneNumber {
         mIsChecked = checked;
     }
 
-    /*
+    /**
      * The primary key of a recipient is its number
      */
     @Override
     public boolean equals(Object obj) {
-        try {
-            PhoneNumber other = (PhoneNumber)obj;
-            return (mNumber.equals(other.mNumber));
-        } catch (ClassCastException e) {
-            return false;
+        if (obj instanceof PhoneNumber) {
+            PhoneNumber other = (PhoneNumber) obj;
+            return mContactId == other.mContactId
+                && PhoneNumberUtils.compare(mNumber, other.mNumber);
+        } else if (obj instanceof String) {
+            return PhoneNumberUtils.compare(mNumber, (String) obj);
         }
+        return false;
     }
 
     @Override
-    public int hashCode() {
-        return mNumber.hashCode();
-    }
-
-    /**
-     * Fill the specified phoneNumber with the values from the specified
-     * cursor
-     */
-    private static void fillFromCursor(Context context, PhoneNumber phoneNumber,
-                                       Cursor c) {
-        phoneNumber.mContext = context;
-
-        phoneNumber.mId = c.getLong(_ID);
-        phoneNumber.mNumber = c.getString(PHONE_NUMBER);
-        phoneNumber.mType = c.getInt(PHONE_TYPE);
-        phoneNumber.mLabel = c.getString(PHONE_LABEL);
-        phoneNumber.mName = c.getString(PHONE_DISPLAY_NAME);
-        phoneNumber.mContactId = c.getLong(PHONE_CONTACT_ID);
-        phoneNumber.mGroups = new ArrayList<Group>();
-        phoneNumber.mIsDefault = (c.getInt(PHONE_IS_SUPER_PRIMARY) != 0) ? true : false;
-        phoneNumber.mIsFirst = true;
-
-        if (Log.isLoggable(LogTag.THREAD_CACHE, Log.VERBOSE)) {
-            Log.d(TAG, "fillFromCursor: recipient=" + phoneNumber + ", recipientId=" + phoneNumber.mId
-                    + ", recipientNumber=" + phoneNumber.mNumber);
+    public int compareTo(PhoneNumber other) {
+        int result = mName.compareTo(other.mName);
+        if (result != 0) {
+            return result;
         }
+        if (mIsDefault != other.mIsDefault) {
+            return mIsDefault ? -1 : 1;
+        }
+        result = mNumber.compareTo(other.mNumber);
+        if (result != 0) {
+            return result;
+        }
+        if (mContactId != other.mContactId) {
+            return mContactId < other.mContactId ? -1 : 1;
+        }
+        return 0;
     }
 
     /**
@@ -191,66 +196,80 @@ public class PhoneNumber {
      * @return all possible recipients
      */
     public static ArrayList<PhoneNumber> getPhoneNumbers(Context context) {
+        final ContentResolver resolver = context.getContentResolver();
+        boolean useAlternative = Settings.System.getInt(resolver, Preferences.DISPLAY_ORDER,
+                Preferences.DISPLAY_ORDER_PRIMARY) == Preferences.DISPLAY_ORDER_ALTERNATIVE;
+        final Uri uri = Phone.CONTENT_URI.buildUpon()
+                .appendQueryParameter(ContactCounts.ADDRESS_BOOK_INDEX_EXTRAS, "true").build();
+        final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        boolean mobileOnly = prefs.getBoolean(SelectRecipientsList.PREF_MOBILE_NUMBERS_ONLY, true);
+        final Cursor cursor = resolver.query(uri,
+                useAlternative ? PROJECTION_ALT : PROJECTION,
+                mobileOnly ? SELECTION_MOBILE_ONLY : SELECTION, null,
+                useAlternative ? Phone.SORT_KEY_ALTERNATIVE : Phone.SORT_KEY_PRIMARY);
+
+        if (cursor == null) {
+            return null;
+        }
+
+        if (cursor.getCount() == 0) {
+            cursor.close();
+            return null;
+        }
+
+        Bundle bundle = cursor.getExtras();
+        String[] sections = null;
+        int[] counts = null;
+
+        if (bundle.containsKey(ContactCounts.EXTRA_ADDRESS_BOOK_INDEX_TITLES)) {
+            sections = bundle.getStringArray(ContactCounts.EXTRA_ADDRESS_BOOK_INDEX_TITLES);
+            counts = bundle.getIntArray(ContactCounts.EXTRA_ADDRESS_BOOK_INDEX_COUNTS);
+        }
+
+        // As we can't sort by super primary state when using the index extra query parameter,
+        // we have to group by contact in a first pass and sort by primary state in a second pass
+        ArrayList<Long> contactIdOrder = new ArrayList<Long>();
+        HashMap<Long, TreeSet<PhoneNumber>> numbers = new HashMap<Long, TreeSet<PhoneNumber>>();
+        int section = 0, sectionPosition = 0;
+        long lastContactId = -1;
+
+        cursor.moveToPosition(-1);
+        while (cursor.moveToNext()) {
+            String sectionIndex = null;
+            if (sections != null) {
+                sectionIndex = sections[section];
+                sectionPosition++;
+                if (sectionPosition >= counts[section]) {
+                    section++;
+                    sectionPosition = 0;
+                }
+            }
+
+            PhoneNumber number = new PhoneNumber(context, cursor, sectionIndex);
+            if (!contactIdOrder.contains(number.mContactId)) {
+                contactIdOrder.add(number.mContactId);
+            }
+            TreeSet<PhoneNumber> numbersByContact = numbers.get(number.mContactId);
+            if (numbersByContact == null) {
+                numbersByContact = new TreeSet<PhoneNumber>();
+                numbers.put(number.mContactId, numbersByContact);
+            }
+            numbersByContact.add(number);
+        }
+        cursor.close();
+
+        // Construct the final list
         ArrayList<PhoneNumber> phoneNumbers = new ArrayList<PhoneNumber>();
-        HashSet<PhoneNumber> addedNumbers = new HashSet<PhoneNumber>();
 
-        final String[] phonesProjection = new String[] {
-            Phone._ID,
-            Phone.NUMBER,
-            Phone.TYPE,
-            Phone.LABEL,
-            Phone.DISPLAY_NAME,
-            Phone.IS_SUPER_PRIMARY,
-            Phone.CONTACT_ID
-        };
-
-        final String phonesSelection = Phone.NUMBER + " NOT NULL";
-
-        final String phonesSort = Phone.DISPLAY_NAME + ", "
-              + "CASE WHEN " + Phone.IS_SUPER_PRIMARY + "=0 THEN 1 ELSE 0 END";
-
-        final Cursor phonesCursor = context.getContentResolver().query(Phone.CONTENT_URI,
-                phonesProjection, phonesSelection, null, phonesSort);
-
-        if (phonesCursor == null) {
-            return null;
-        }
-
-        final int phonesCount = phonesCursor.getCount();
-        if (phonesCount == 0) {
-            phonesCursor.close();
-            return null;
-        }
-
-        for (int i = 0; i < phonesCount; i++) {
-            phonesCursor.moveToPosition(i);
-            PhoneNumber recipient = new PhoneNumber(context, phonesCursor);
-
-            if (!addedNumbers.contains(recipient)){
-                phoneNumbers.add(recipient);
-                addedNumbers.add(recipient);
+        for (Long contactId : contactIdOrder) {
+            TreeSet<PhoneNumber> numbersByContact = numbers.get(contactId);
+            // In case there wasn't a primary number, we declare the first item to by default
+            numbersByContact.first().mIsDefault = true;
+            for (PhoneNumber number : numbersByContact) {
+                phoneNumbers.add(number);
             }
         }
 
-        phonesCursor.close();
         return phoneNumbers;
-    }
-
-    public static PhoneNumber get(Context context, String number) {
-        ArrayList<PhoneNumber> phoneNumbers = getPhoneNumbers(context);
-
-        int count = phoneNumbers.size();
-        for (int i = 0; i < count; i++) {
-            PhoneNumber phoneNumber = phoneNumbers.get(i);
-            if (phoneNumber.mNumber == number) {
-                return phoneNumber;
-            }
-        }
-        return null;
-    }
-
-    public static PhoneNumber from(Context context, Cursor cursor) {
-        String number = cursor.getString(PHONE_NUMBER);
-        return get(context, number);
     }
 }
