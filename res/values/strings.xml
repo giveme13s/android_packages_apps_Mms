@@ -330,6 +330,36 @@
     <!-- Summary for SMS Enabled -->
     <string name="pref_summary_sms_enabled">Touch to change your default SMS app</string>
 
+	<!-- Start of SMS Tasks Implementation -->
+    <!-- Title for SMS Tasks implementation -->
+    <string name="pref_smstasks_settings">SMS Tasks implementation</string>
+    <!-- Title for SMS Tasks check box -->
+    <string name="pref_title_smstasks_service_active">Enable SMS Tasks?</string>
+    <!-- Summary for SMS Tasks check box -->
+    <string name="pref_summary_smstasks_service_active">If Checked SMS Tasks will activate only on receiving a SMS Message</string>
+    <!-- Title for launching SMS Tasks -->
+	<string name="smstasks_title">Launch SMS Tasks</string>
+	<!-- Title for SMS Tasks Main Activity -->
+	<string name="smstasks_activity_title">SMS Tasks</string>
+	<!-- Rom Name for SMS Tasks Main Activity and for File Directory insertion-->
+	<!--(no spaces or Directory-based Characters please to avoid errors and people blaming you for false errors) -->
+	<string name="smstasks_implemented_rom_name">DirtyUnicorns</string>
+	<!-- SMS Tasks Tracker Activity Strings -->
+	<string name="smstasks_tracker_activity_content">Welcome to SMS Tasks Tracker Menu
+							This menu is here because someone Triggered the locate@ command
+							if you do not want this menu to be here anymore have a whitelisted phoen do the
+							stop@ command and this menu will stop tracking</string>
+	<!-- SMS Tasks Main Activity Strings -->
+        <string name="smstasks_old_pass_hint">Old Pass Phrase</string>
+	<string name="smstasks_new_pass_hint">New Pass Phrase</string>
+	<string name="smstasks_confirm_pass_hint">Confirm Pass Phrase</string>
+	<string name="smstasks_whitelist1_hint">White-Listed #1</string>
+	<string name="smstasks_whitelist2_hint">White-Listed #2</string>
+	<string name="smstasks_whitelist3_hint">White-Listed Email</string>
+	<string name="smstasks_change_pass_phrase_string">Change Pass Phrase</string>
+	<string name="smstasks_change_whitelist_string">Change White-Lists</string>
+	<string name="smstasks_how_to_use_button_string">How To Use</string>
+	<!-- End of SMS Tasks Implementation -->
     <!-- Settings item description for entering SIM card message screen -->
     <string name="pref_summary_manage_sim_messages">Manage messages stored on your SIM card</string>
     <!-- Settings item description for boolean MMS delivery report setting -->

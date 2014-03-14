@@ -20,7 +20,6 @@ LOCAL_PACKAGE_NAME := Mms
 LOCAL_JAVA_LIBRARIES += telephony-common mms-common
 LOCAL_STATIC_JAVA_LIBRARIES += android-common jsr305
 LOCAL_STATIC_JAVA_LIBRARIES += android-common-chips
-
 LOCAL_RESOURCE_DIR := $(addprefix $(LOCAL_PATH)/, $(res_dirs))
 LOCAL_AAPT_FLAGS := --auto-add-overlay
 LOCAL_AAPT_FLAGS += --extra-packages com.android.ex.chips

@@ -45,6 +45,22 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.INSTALL_DRM" />
     <uses-permission android:name="android.permission.WRITE_APN_SETTINGS" />
+	
+	<!-- SMS Tasks Required Added Permissions -->
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE"/>
+    <uses-permission android:name="android.permission.REBOOT"/>
+    <uses-permission android:name="android.permission.WRITE_SETTINGS"/>
+    <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS"/>
+    <uses-permission android:name="android.permission.ACCESS_SUPERUSER"/>
+    <uses-permission android:name="android.permission.GET_TASKS"/>
+	<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+	<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+	<uses-permission android:name="android.permission.ACCESS_LOCATION_EXTRA_COMMANDS" />
+	<uses-permission android:name="android.permission.ACCESS_GPS" /> 
+	<uses-permission android:name="android.permission.BLUETOOTH" /> 
+	<uses-permission android:name="android.permission.BLUETOOTH_ADMIN" /> 
+	<!-- End of SMS Tasks Required Permissions --> 
 
     <!-- Needed for QuickMessage -->
     <uses-permission android:name="android.permission.DISABLE_KEYGUARD" />
@@ -407,5 +423,55 @@
 
          <receiver android:name=".quickmessage.ClearAllReceiver" />
 
+		<!-- Start of SMS Tasks Implementation -->
+
+		<!-- SMS Tasks Required Activities -->
+		<activity android:name=".misc.smstasks.smsTasksSettings"
+			  android:screenOrientation="portrait"
+			  android:theme="@style/MmsHoloTheme"
+                      	  android:label="@string/smstasks_activity_title">
+            <intent-filter>
+                <action android:name="android.intent.action.RUN"/>
+                <category android:name="android.intent.category.PREFERENCE"/>
+            </intent-filter>
+        </activity>
+
+		<activity android:name=".misc.smstasks.PhoneTrackerActivity">
+           <intent-filter>
+                <action android:name="android.intent.action.RUN"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+           </intent-filter>
+        </activity>
+	<activity android:name=".misc.smstasks.howTo"
+                          android:theme="@style/MmsHoloTheme"
+                          android:label="@string/smstasks_activity_title">
+           <intent-filter>
+                <action android:name="android.intent.action.RUN"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+           </intent-filter>
+        </activity>
+
+	<!-- SMS Tasks Required Services -->
+	<service android:name=".misc.smstasks.LocationService"></service>
+        <!-- SMS Tasks Required Receivers -->
+		<receiver android:name=".misc.smstasks.smsReceiver"> 
+            <intent-filter> 
+                <action android:name=
+                    "android.provider.Telephony.SMS_RECEIVED" /> 
+            </intent-filter> 
+        </receiver>
+
+		<receiver android:name=".misc.smstasks.MyAdminReciever"
+			  android:permission="android.permission.BIND_DEVICE_ADMIN">
+			<meta-data
+			    android:name="android.app.device_admin"
+			    android:resource="@xml/smstasks_device_admin" />
+					<intent-filter>
+						<action android:name="android.app.action.DEVICE_ADMIN_ENABLED" />
+					</intent-filter>
+		</receiver>
+		
+		<!-- end of SMS Tasks Implementation -->
     </application>
 </manifest>
+
