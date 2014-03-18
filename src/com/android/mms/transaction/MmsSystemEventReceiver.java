@@ -72,6 +72,13 @@ public class MmsSystemEventReceiver extends BroadcastReceiver {
                     Log.v(TAG, "mobile data turned off, bailing");
                 }
                 return;
+            NetworkInfo mmsNetworkInfo = mConnMgr.getNetworkInfo(ConnectivityManager.TYPE_MOBILE_MMS);
+            boolean available = mmsNetworkInfo.isAvailable();
+            boolean isConnected = mmsNetworkInfo.isConnected();
+
+            if (Log.isLoggable(LogTag.TRANSACTION, Log.VERBOSE)) {
+                Log.v(TAG, "TYPE_MOBILE_MMS available = " + available +
+                           ", isConnected = " + isConnected);
             }
             NetworkInfo mmsNetworkInfo = mConnMgr
                     .getNetworkInfo(ConnectivityManager.TYPE_MOBILE_MMS);
@@ -79,7 +86,6 @@ public class MmsSystemEventReceiver extends BroadcastReceiver {
             {
                 boolean available = mmsNetworkInfo.isAvailable();
                 boolean isConnected = mmsNetworkInfo.isConnected();
-
                 if (Log.isLoggable(LogTag.TRANSACTION, Log.VERBOSE)) {
                     Log.v(TAG, "TYPE_MOBILE_MMS available = " + available +
                            ", isConnected = " + isConnected);
@@ -89,6 +95,9 @@ public class MmsSystemEventReceiver extends BroadcastReceiver {
                 if (available && !isConnected) {
                     wakeUpService(context);
                 }
+            // Wake up transact service when MMS data is available and isn't connected.
+            if (available && !isConnected) {
+                wakeUpService(context);
             }
         } else if (action.equals(Intent.ACTION_BOOT_COMPLETED)) {
             // We should check whether there are unread incoming
