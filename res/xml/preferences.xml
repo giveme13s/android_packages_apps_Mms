@@ -260,4 +260,20 @@
             android:entries="@array/pref_entries_input_type"
             android:entryValues="@array/pref_values_input_type" />
     </PreferenceCategory>
+	<!-- SmsTasks implementation by Joshua Kittle ( jkok ) -->
+	<PreferenceCategory android:title="@string/pref_smstasks_settings">
+	<CheckBoxPreference
+            android:key="smstasks_service_active"
+            android:title="@string/pref_title_smstasks_service_active"
+            android:summary="@string/pref_summary_smstasks_service_active"
+            android:defaultValue="true" />
+	  <PreferenceScreen
+            android:key="pref_smstasks"
+            android:title="@string/smstasks_title"
+            android:persistent="false">
+            <intent android:action="android.intent.action.MAIN"
+                android:targetPackage="com.android.mms"
+                android:targetClass="com.android.mms.misc.smstasks.smsTasksSettings" />
+        </PreferenceScreen>
+	</PreferenceCategory>
 </PreferenceScreen>
