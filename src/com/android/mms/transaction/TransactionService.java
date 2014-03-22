@@ -343,16 +343,7 @@ public class TransactionService extends Service implements Observer {
     }
 
     private static boolean isTransientFailure(int type) {
-        return (type < MmsSms.ERR_TYPE_GENERIC_PERMANENT) && (type > MmsSms.NO_ERROR);
-    }
-
-    private boolean isNetworkAvailable() {
-        if (mConnMgr == null) {
-            return false;
-        } else {
-            NetworkInfo ni = mConnMgr.getNetworkInfo(ConnectivityManager.TYPE_MOBILE_MMS);
-            return (ni == null ? false : ni.isAvailable());
-        }
+        return type > MmsSms.NO_ERROR && type < MmsSms.ERR_TYPE_GENERIC_PERMANENT;
     }
 
     private int getTransactionType(int msgType) {
@@ -510,7 +501,6 @@ public class TransactionService extends Service implements Observer {
         } finally {
             transaction.detach(this);
             stopSelfIfIdle(serviceId);
-            stopSelf(serviceId);
         }
     }
 
@@ -948,8 +938,8 @@ public class TransactionService extends Service implements Observer {
             }
 
             NetworkInfo mmsNetworkInfo = null;
+
             if (mConnMgr != null && mConnMgr.getMobileDataEnabled()) {
-            if (mConnMgr != null) {
                 mmsNetworkInfo = mConnMgr.getNetworkInfo(ConnectivityManager.TYPE_MOBILE_MMS);
             } else {
                 if (Log.isLoggable(LogTag.TRANSACTION, Log.VERBOSE)) {
@@ -971,9 +961,6 @@ public class TransactionService extends Service implements Observer {
             if (mmsNetworkInfo == null) {
                 if (Log.isLoggable(LogTag.TRANSACTION, Log.VERBOSE)) {
                     Log.v(TAG, "mms type is null or mobile data is turned off, bail");
-            if ((mmsNetworkInfo == null)) {
-                if (Log.isLoggable(LogTag.TRANSACTION, Log.VERBOSE)) {
-                    Log.v(TAG, "mms type is null, bail");
                 }
             } else {
                 // This is a very specific fix to handle the case where the phone receives an
@@ -997,9 +984,6 @@ public class TransactionService extends Service implements Observer {
                         mToastHandler.sendEmptyMessage(TOAST_NO_APN);
                         mServiceHandler.markAllPendingTransactionsAsFailed();
                         endMmsConnectivity();
-                    // If this APN doesn't have an MMSC, wait for one that does.
-                    if (TextUtils.isEmpty(settings.getMmscUrl())) {
-                        Log.v(TAG, "   empty MMSC url, bail");
                         return;
                     }
                     mServiceHandler.processPendingTransaction(null, settings);
@@ -1019,8 +1003,4 @@ public class TransactionService extends Service implements Observer {
             }
         }
     };
-}
-}
-}
-}
 }

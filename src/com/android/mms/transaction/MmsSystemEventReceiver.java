@@ -43,10 +43,12 @@ import com.android.mms.MmsApp;
 public class MmsSystemEventReceiver extends BroadcastReceiver {
     private static final String TAG = "MmsSystemEventReceiver";
     private static ConnectivityManager mConnMgr = null;
+
     public static void wakeUpService(Context context) {
         if (Log.isLoggable(LogTag.TRANSACTION, Log.VERBOSE)) {
             Log.v(TAG, "wakeUpService: start transaction service ...");
         }
+
         context.startService(new Intent(context, TransactionService.class));
     }
 
@@ -55,38 +57,49 @@ public class MmsSystemEventReceiver extends BroadcastReceiver {
         if (Log.isLoggable(LogTag.TRANSACTION, Log.VERBOSE)) {
             Log.v(TAG, "Intent received: " + intent);
         }
+
         String action = intent.getAction();
         if (action.equals(Mms.Intents.CONTENT_CHANGED_ACTION)) {
             Uri changed = (Uri) intent.getParcelableExtra(Mms.Intents.DELETED_CONTENTS);
             MmsApp.getApplication().getPduLoaderManager().removePdu(changed);
         } else if (action.equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
             if (mConnMgr == null) {
-                mConnMgr = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+                mConnMgr = (ConnectivityManager) context
+                        .getSystemService(Context.CONNECTIVITY_SERVICE);
             }
             if (!mConnMgr.getMobileDataEnabled()) {
                 if (Log.isLoggable(LogTag.TRANSACTION, Log.VERBOSE)) {
                     Log.v(TAG, "mobile data turned off, bailing");
                 }
                 return;
-	    }
-            NetworkInfo mmsNetworkInfo = mConnMgr.getNetworkInfo(ConnectivityManager.TYPE_MOBILE_MMS);
-            boolean available = mmsNetworkInfo.isAvailable();
-            boolean isConnected = mmsNetworkInfo.isConnected();
-            if (Log.isLoggable(LogTag.TRANSACTION, Log.VERBOSE)) {
-               Log.v(TAG, "TYPE_MOBILE_MMS available = " + available + ", isConnected = " + isConnected);
             }
-            // Wake up transact service when MMS data is available and isn't connected.
-            if (available && !isConnected) {
-                wakeUpService(context);
+            NetworkInfo mmsNetworkInfo = mConnMgr
+                    .getNetworkInfo(ConnectivityManager.TYPE_MOBILE_MMS);
+            if (mmsNetworkInfo!=null)
+            {
+                boolean available = mmsNetworkInfo.isAvailable();
+                boolean isConnected = mmsNetworkInfo.isConnected();
+
+                if (Log.isLoggable(LogTag.TRANSACTION, Log.VERBOSE)) {
+                    Log.v(TAG, "TYPE_MOBILE_MMS available = " + available +
+                           ", isConnected = " + isConnected);
+                }
+
+                // Wake up transact service when MMS data is available and isn't connected.
+                if (available && !isConnected) {
+                    wakeUpService(context);
+                }
             }
         } else if (action.equals(Intent.ACTION_BOOT_COMPLETED)) {
             // We should check whether there are unread incoming
             // messages in the Inbox and then update the notification icon.
             // Called on the UI thread so don't block.
-            MessagingNotification.nonBlockingUpdateNewMessageIndicator( context, MessagingNotification.THREAD_NONE, false);
+            MessagingNotification.nonBlockingUpdateNewMessageIndicator(
+                    context, MessagingNotification.THREAD_NONE, false);
+
             // Scan and send pending Mms once after boot completed since
             // ACTION_ANY_DATA_CONNECTION_STATE_CHANGED wasn't registered in a whole life cycle
             wakeUpService(context);
-		}
-	 }
+        }
+    }
 }
