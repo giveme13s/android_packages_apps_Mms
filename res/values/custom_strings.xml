@@ -167,6 +167,10 @@
     <string name="menu_groups">Show groups</string>
     <string name="fastscroll_index_groups">GR</string> <!-- CHAR LIMIT=3 -->
 
+    <!-- Select audio file -->
+    <string name="system_audio_item">System audio</string>
+    <string name="external_audio_item">External audio</string>
+
     <!-- Delay delivery -->
     <string name="pref_title_send_delay">Delivery delay</string>
     <string name="send_delay_immediate">Send immediately</string>
