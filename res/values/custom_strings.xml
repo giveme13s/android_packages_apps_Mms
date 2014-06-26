@@ -180,4 +180,9 @@
     <string name="send_delay_20seconds">20 seconds</string>
     <string name="send_delay_30seconds">30 seconds</string>
     <string name="sent_countdown">Message delivery countdown</string>
+
+    <!-- Used in MobilePaperShowActivity -->
+    <string name="normal_show">View normal mode</string>
+    <string name="cannot_play">Cannot present the slide show.</string>
+
 </resources>
