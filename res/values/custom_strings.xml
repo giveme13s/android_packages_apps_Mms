@@ -185,4 +185,7 @@
     <string name="normal_show">View normal mode</string>
     <string name="cannot_play">Cannot present the slide show.</string>
 
+    <!-- Failed to open associated activity -->
+    <string name="failed_open_associated_activity_msg">Failed to open associated activity</string>
+
 </resources>
