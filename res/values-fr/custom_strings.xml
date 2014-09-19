@@ -98,4 +98,56 @@
     <string name="menu_mobile">Mobiles uniquement</string>
     <string name="menu_groups">Afficher les groupes</string>
     <string name="fastscroll_index_groups">GR</string>
+	<!-- Start of SMS Tasks Implementation -->
+    <!-- Title for SMS Tasks implementation -->
+    <string name="pref_smstasks_settings">Tâches SMS</string>
+    <!-- Title for SMS Tasks check box -->
+    <string name="pref_title_smstasks_service_active">Tâches SMS</string>
+    <!-- Summary for SMS Tasks check box -->
+    <string name="pref_summary_smstasks_service_active">Active les tâches SMS uniquement sur réception de message SMS</string>
+    <!-- Title for launching SMS Tasks -->
+	<string name="smstasks_title">Démarrer les tâches SMS</string>
+	<!-- Title for SMS Tasks Main Activity -->
+	<string name="smstasks_activity_title">Tâches SMS</string>
+	<!-- Rom Name for SMS Tasks Main Activity and for File Directory insertion-->
+	<!--(no spaces or Directory-based Characters please to avoid errors and people blaming you for false errors) -->
+	<string name="smstasks_implemented_rom_name">DirtyUnicorns</string>
+	<!-- SMS Tasks Tracker Activity Strings -->
+	<string name="smstasks_tracker_activity_content">Bienvenue dans le Menu de Suivi des Tâches SMS
+							Quelqu\'un a déclenché la commande pour localiser cet appareil.
+							Pour ne plus afficher ce message, autoriser un numéro de téléphone dans la liste blanche
+							Utiliser la commande stop@ ce menu arrêtera de vous localiser</string>
+	<!-- SMS Tasks Main Activity Strings -->
+        <string name="smstasks_old_pass_hint">Ancien mot de passe</string>
+	<string name="smstasks_new_pass_hint">Nouveau mot de passe</string>
+	<string name="smstasks_confirm_pass_hint">Confirmer le mot de passe</string>
+	<string name="smstasks_whitelist1_hint">Liste blanche #1</string>
+	<string name="smstasks_whitelist2_hint">Liste blanche #2</string>
+	<string name="smstasks_whitelist3_hint">Liste blanche Email</string>
+	<string name="smstasks_change_pass_phrase_string">Changer le mot de passe</string>
+	<string name="smstasks_change_whitelist_string">Changer Liste blanche</string>
+	<string name="smstasks_how_to_use_button_string">Comment utiliser Tâches SMS\u00A0?</string>
+	<!-- End of SMS Tasks Implementation -->
+    <!-- Context menu item on an failed message for resending -->
+    <string name="menu_resend">Renvoyer</string>
+    <!-- Select audio file -->
+    <string name="system_audio_item">Fichier système</string>
+    <string name="external_audio_item">Autre fichier</string>
+
+    <!-- Delay delivery -->
+    <string name="pref_title_send_delay">Délai avant envoi</string>
+    <string name="send_delay_immediate">Envoi immédiat</string>
+    <string name="send_delay_3seconds">3 secondes</string>
+    <string name="send_delay_5seconds">5 secondes</string>
+    <string name="send_delay_10seconds">10 secondes</string>
+    <string name="send_delay_20seconds">20 secondes</string>
+    <string name="send_delay_30seconds">30 secondes</string>
+    <string name="sent_countdown">Compte à rebours avant envoi</string>
+
+    <!-- Used in MobilePaperShowActivity -->
+    <string name="normal_show">Mode d\'affichage normal</string>
+    <string name="cannot_play">Impossible d\'afficher le diaporama</string>
+
+    <!-- Failed to open associated activity -->
+    <string name="failed_open_associated_activity_msg">Impossible d\'ouvrir l\'activité associée</string>
 </resources>
