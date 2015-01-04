@@ -76,6 +76,7 @@ import com.android.mms.data.Contact;
 import com.android.mms.data.ContactList;
 import com.android.mms.data.Conversation;
 import com.android.mms.data.Conversation.ConversationQueryHandler;
+import com.android.mms.data.RecipientIdCache;
 import com.android.mms.transaction.MessagingNotification;
 import com.android.mms.transaction.SmsRejectedReceiver;
 import com.android.mms.util.DraftCache;
@@ -151,6 +152,8 @@ public class ConversationList extends ListActivity implements DraftCache.OnDraft
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // Cache recipients information in a background thread in advance.
+        RecipientIdCache.init(this);
 
         setContentView(R.layout.conversation_list_screen);
 
