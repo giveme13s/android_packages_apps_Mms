@@ -108,6 +108,9 @@ public class MessagingPreferenceActivity extends PreferenceActivity
     public static final String QM_CLOSE_ALL_ENABLED      = "pref_key_close_all";
     public static final String QM_DARK_THEME_ENABLED     = "pref_dark_theme";
 
+    //Fontsize
+    public static final String FONT_SIZE_SETTING         = "pref_key_message_font_size";
+
     // Menu entries
     private static final int MENU_RESTORE_DEFAULTS       = 1;
 
@@ -137,6 +140,7 @@ public class MessagingPreferenceActivity extends PreferenceActivity
     private CheckBoxPreference mEnableNotificationsPref;
     private CheckBoxPreference mEnablePrivacyModePref;
     private CheckBoxPreference mMmsAutoRetrievialPref;
+    private ListPreference mFontSizePref;
     private RingtonePreference mRingtonePref;
     private Recycler mSmsRecycler;
     private Recycler mMmsRecycler;
@@ -162,6 +166,8 @@ public class MessagingPreferenceActivity extends PreferenceActivity
     private CheckBoxPreference mEnableQmLockscreenPref;
     private CheckBoxPreference mEnableQmCloseAllPref;
     private CheckBoxPreference mEnableQmDarkThemePref;
+
+    public static final String MESSAGE_FONT_SIZE = "message_font_size";
 
     private BroadcastReceiver mReceiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
@@ -281,6 +287,8 @@ public class MessagingPreferenceActivity extends PreferenceActivity
         // SMS Sending Delay
         mMessageSendDelayPref = (ListPreference) findPreference(SEND_DELAY_DURATION);
         mMessageSendDelayPref.setSummary(mMessageSendDelayPref.getEntry());
+
+        mFontSizePref = (ListPreference) findPreference(FONT_SIZE_SETTING);
 
         setMessagePreferences();
     }
@@ -418,6 +426,7 @@ public class MessagingPreferenceActivity extends PreferenceActivity
         mInputTypePref.setOnPreferenceChangeListener(this);
 
         mMessageSendDelayPref.setOnPreferenceChangeListener(this);
+        setSmsPreferFontSummary();
     }
 
     public static long getMessageSendDelayDuration(Context context) {
@@ -762,5 +771,22 @@ public class MessagingPreferenceActivity extends PreferenceActivity
         return MmsConfig.getGroupMmsEnabled() &&
                 groupMmsPrefOn &&
                 !TextUtils.isEmpty(MessageUtils.getLocalNumber());
+    }
+
+    private void setSmsPreferFontSummary() {
+        if (mFontSizePref != null) {
+            mFontSizePref
+                    .setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+                        public boolean onPreferenceChange(
+                                Preference preference, Object newValue) {
+                            final String summary = newValue.toString();
+                            int index = mFontSizePref.findIndexOfValue(summary);
+                            mFontSizePref.setSummary(mFontSizePref.getEntries()[index]);
+                            mFontSizePref.setValue(summary);
+                            return true;
+                        }
+                    });
+            mFontSizePref.setSummary(mFontSizePref.getEntry());
+        }
     }
 }

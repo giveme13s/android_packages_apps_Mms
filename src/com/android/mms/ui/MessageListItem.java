@@ -153,6 +153,7 @@ public class MessageListItem extends ZoomMessageListItem implements
         mDetailsIndicator = (ImageView) findViewById(R.id.details_indicator);
         mAvatar = (CheckableQuickContactBadge) findViewById(R.id.avatar);
         mMessageBlock = findViewById(R.id.message_block);
+        setBodyTextSize(MessageUtils.getFontSize());
 
         // Add the views to be managed by the zoom control
         addZoomableTextView(mBodyTextView);
@@ -893,6 +894,13 @@ public class MessageListItem extends ZoomMessageListItem implements
             mDateView.setText(buildTimestampLine(mMessageItem.isSending()
                 ? mContext.getResources().getString(R.string.sending_message)
                 : mMessageItem.mTimestamp));
+        }
+    }
+
+    public void setBodyTextSize(float size) {
+        if (mBodyTextView != null
+                && mBodyTextView.getVisibility() == View.VISIBLE) {
+            mBodyTextView.setTextSize(size);
         }
     }
 }
