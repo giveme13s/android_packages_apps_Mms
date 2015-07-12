@@ -138,4 +138,14 @@
 
     <string name="start_new_message_button">Nouveau message</string>
 
+    <!-- Font Settings -->
+    <string name="pref_title_message_font_size">Taille de la police</string>
+    <string name="message_font_size_dialog_title">Taille de la police</string>
+    <string name="font_follow_system_font">Utiliser la taille de la police système</string>
+    <string name="font_small">Petite</string>
+    <string name="font_medium">Moyenne</string>
+    <string name="font_large">Grande</string>
+    <string name="font_extra_large">Extra grande</string>
+    <string name="def_message_font_size_value">18</string>
+
 </resources>
