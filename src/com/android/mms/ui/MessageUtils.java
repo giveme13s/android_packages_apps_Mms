@@ -85,11 +85,32 @@ public class MessageUtils {
         void onResizeResult(PduPart part, boolean append);
     }
 
+    private static final int SELECT_SYSTEM = 0;
+    private static final int SELECT_EXTERNAL = 1;
+    private static final boolean DEBUG = false;
+    public static final int SUB_INVALID = -1;  //  for single card product
+    public static final int SUB1 = 0;  // for DSDS product of slot one
+    public static final int SUB2 = 1;  // for DSDS product of slot two
+    public static final int MESSAGE_READ = 1;
+    public static final int MESSAGE_SEEN = 1;
+    // add manage mode of multi select action
+    public static final int INVALID_MODE= -1;
+    public static final int FORWARD_MODE = 0;
+    public static final int SIM_MESSAGE_MODE = 1;
+    public static final Uri ICC_URI = Uri.parse("content://sms/icc");
+    public static final Uri ICC1_URI = Uri.parse("content://sms/icc1");
+    public static final Uri ICC2_URI = Uri.parse("content://sms/icc2");
+    private static final int TIMESTAMP_LENGTH = 7;  // See TS 23.040 9.2.3.11
+
     private static final int DEFAULT_FONT_SIZE = 18;
 
     private static final String TAG = LogTag.TAG;
     private static String sLocalNumber;
     private static String[] sNoSubjectStrings;
+
+    public static final int PREFER_SMS_STORE_PHONE = 0;
+    public static final int PREFER_SMS_STORE_CARD = 1;
+    private static final Uri BOOKMARKS_URI = Uri.parse("content://browser/bookmarks");
 
     // Cache of both groups of space-separated ids to their full
     // comma-separated display names, as well as individual ids to

@@ -5,11 +5,14 @@ import java.util.ArrayList;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
+import android.preference.PreferenceManager;
 import android.provider.Telephony.Mms;
 import android.provider.Telephony.Sms;
 import android.telephony.PhoneNumberUtils;
 import android.telephony.SmsManager;
+import android.telephony.SubscriptionManager;
 import android.util.Log;
 
 import com.android.mms.LogTag;
@@ -24,13 +27,18 @@ public class SmsSingleRecipientSender extends SmsMessageSender {
     private String mDest;
     private Uri mUri;
     private static final String TAG = LogTag.TAG;
+    private int mPriority = -1;
 
     public SmsSingleRecipientSender(Context context, String dest, String msgText, long threadId,
-            boolean requestDeliveryReport, Uri uri) {
-        super(context, null, msgText, threadId);
+            boolean requestDeliveryReport, Uri uri, int subId) {
+        super(context, null, msgText, threadId, subId);
         mRequestDeliveryReport = requestDeliveryReport;
         mDest = dest;
         mUri = uri;
+    }
+
+    public void setPriority(int priority) {
+        this.mPriority = priority;
     }
 
     public boolean sendMessage(long token) throws MmsException {

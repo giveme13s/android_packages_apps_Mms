@@ -35,17 +35,20 @@ import android.database.sqlite.SqliteWrapper;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.provider.Telephony.Mms;
 import android.provider.Telephony.MmsSms;
 import android.provider.Telephony.MmsSms.PendingMessages;
 import android.provider.Telephony.Sms;
 import android.telephony.SmsMessage;
+import android.telephony.SubscriptionManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
 
 import com.android.common.contacts.DataUsageStatUpdater;
 import com.android.common.userhappiness.UserHappinessSignals;
+import com.android.internal.telephony.PhoneConstants;
 import com.android.mms.ContentRestrictionException;
 import com.android.mms.ExceedMessageSizeException;
 import com.android.mms.LogTag;
@@ -120,6 +123,8 @@ public class WorkingMessage {
     public static final int VIDEO = 2;
     public static final int AUDIO = 3;
     public static final int SLIDESHOW = 4;
+    public static final int VCARD = 5;
+    public static final int VCAL = 6;
 
     // Current attachment type of the message; one of the above values.
     private int mAttachmentType;
@@ -139,6 +144,8 @@ public class WorkingMessage {
 
     // Set to true if this message has been discarded.
     private boolean mDiscarded = false;
+    // Subscription this message is to be sent out under
+    private int mSubscriptionId = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
 
     // Track whether we have drafts
     private volatile boolean mHasMmsDraft;
@@ -263,6 +270,10 @@ public class WorkingMessage {
                 mAttachmentType = VIDEO;
             } else if (slide.hasAudio()) {
                 mAttachmentType = AUDIO;
+            } else if (slide.hasVcard()) {
+                mAttachmentType = VCARD;
+            } else if (slide.hasVCal()) {
+                mAttachmentType = VCAL;
             }
         }
 
@@ -364,6 +375,24 @@ public class WorkingMessage {
      */
     public CharSequence getText() {
         return mText;
+    }
+
+    public void setSubscriptionId(int subId) {
+        mSubscriptionId = subId;
+    }
+
+    private int getSubscriptionIdForSms() {
+        if (mSubscriptionId != SubscriptionManager.INVALID_SUBSCRIPTION_ID) {
+            return mSubscriptionId;
+        }
+        return SubscriptionManager.getDefaultSmsSubId();
+    }
+
+    private int getSubscriptionIdForMms() {
+        if (mSubscriptionId != SubscriptionManager.INVALID_SUBSCRIPTION_ID) {
+            return mSubscriptionId;
+        }
+        return SubscriptionManager.getDefaultDataSubId();
     }
 
     /**
@@ -639,6 +668,10 @@ public class WorkingMessage {
                 slideShowEditor.changeVideo(slideNum, uri);
             } else if (type == AUDIO) {
                 slideShowEditor.changeAudio(slideNum, uri);
+            } else if (type == VCARD) {
+                slideShowEditor.changeVcard(slideNum, uri);
+            } else if (type == VCAL) {
+                slideShowEditor.changeVCal(slideNum, uri);
             } else {
                 result = UNSUPPORTED_TYPE;
             }
@@ -663,6 +696,10 @@ public class WorkingMessage {
      */
     public boolean hasAttachment() {
         return (mAttachmentType > TEXT);
+    }
+
+    public boolean hasVcard() {
+        return mAttachmentType == VCARD;
     }
 
     /**
@@ -1341,7 +1378,8 @@ public class WorkingMessage {
             Log.d(LogTag.TRANSACTION, "sendSmsWorker sending message: recipients=" +
                     semiSepRecipients + ", threadId=" + threadId);
         }
-        MessageSender sender = new SmsMessageSender(mActivity, dests, msgText, threadId);
+        MessageSender sender = new SmsMessageSender(mActivity, dests,
+                msgText, threadId, getSubscriptionIdForSms());
         try {
             sender.sendMessage(threadId);
 

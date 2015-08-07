@@ -47,6 +47,7 @@ import android.provider.ContactsContract.Contacts;
 import android.provider.Telephony;
 import android.provider.Telephony.Mms;
 import android.provider.Telephony.Threads;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.ActionMode;
 import android.view.ContextMenu;
@@ -66,8 +67,10 @@ import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SearchView;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.Toolbar;
 
 import com.android.mms.LogTag;
 import com.android.mms.MmsConfig;
@@ -107,6 +110,44 @@ public class ConversationList extends ListActivity implements DraftCache.OnDraft
     public static final int MENU_VIEW                 = 1;
     public static final int MENU_VIEW_CONTACT         = 2;
     public static final int MENU_ADD_TO_CONTACTS      = 3;
+
+    public static final class DeleteInfo {
+
+        private final MessageDeleteTypes mDeleteType;
+        private final int mDeleteCount;
+        private Collection<Long> threadIds;
+
+        public MessageDeleteTypes getDeleteType() {
+            return mDeleteType;
+        }
+
+        public int getDeleteCount() {
+            return mDeleteCount;
+        }
+
+        public Collection<Long> getThreadIds() {
+            return threadIds;
+        }
+
+        public void setThreadIds(Collection<Long> threadIds) {
+            this.threadIds = threadIds;
+        }
+
+        public DeleteInfo(MessageDeleteTypes deleteType) {
+            this(deleteType, -1);
+        }
+
+        public DeleteInfo(MessageDeleteTypes deleteType, int deleteCount) {
+            mDeleteType = deleteType;
+            mDeleteCount = deleteCount;
+        }
+    }
+
+    public static enum MessageDeleteTypes {
+        ALL,
+        SMS,
+        MMS
+    }
 
     public static boolean mIsRunning;
 
